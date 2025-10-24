@@ -18,18 +18,15 @@
 #define TEXT_HEART_OFFSET 2
 #define CLASS_NAME "HTTT3"
 #define PROF_NAME "ThuyTTT"
-#define ROTATE_INTERVAL_MS 500UL 
+#define ROTATE_INTERVAL_MS 400UL 
 
 
 const uint8_t *bitmapA = epd_bitmap_heart1; 
 const uint8_t *bitmapB = epd_bitmap_heart2; 
 const uint8_t *currentHeartBitmap = bitmapA; 
 unsigned long lastRotateMillis = 0;
-bool startedSplitScreen = false;
 
-void setCurrentBitmap(const uint8_t *bmp) {
-  if (bmp) currentHeartBitmap = bmp;
-}
+
 
 void toggleBitmap() {
   currentHeartBitmap = (currentHeartBitmap == bitmapA) ? bitmapB : bitmapA;
@@ -63,6 +60,13 @@ void drawHeartText(bool isDisplay = true)
   display.print(PROF_NAME);
 
   // use the selected bitmap pointer
+  
+  unsigned long now = millis();
+  if (now - lastRotateMillis >= ROTATE_INTERVAL_MS) {
+    lastRotateMillis = now;
+    toggleBitmap();       
+  }
+
   display.drawBitmap(
       (SCREEN_WIDTH - HEART_WIDTH) / 2,
       (SCREEN_HEIGHT - HEART_HEIGHT) / 2,
@@ -439,20 +443,12 @@ void setup()
   delay(500);
   playConfetti(5000UL);
   splitScreen();
-  lastRotateMillis = millis();
-  startedSplitScreen = true;
 }
 
 
 void loop()
 {
-  if (startedSplitScreen) {
-    unsigned long now = millis();
-    if (now - lastRotateMillis >= ROTATE_INTERVAL_MS) {
-      lastRotateMillis = now;
-      toggleBitmap();       
-      drawHeartText(true); 
-    }
-  }
+  drawHeartText(true); 
+  delay(1000);
 
 }
